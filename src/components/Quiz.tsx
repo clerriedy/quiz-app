@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import questions from "../data/questions.json";
+import { Question, Results } from ".";
 
-const Quiz: React.FC = () => {
+export const Quiz: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[][]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -16,14 +17,14 @@ const Quiz: React.FC = () => {
     }
 
     if (isMultipleAnswer) {
-      // Para preguntas con múltiples respuestas, toggleamos la selección
       if (newSelectedAnswers[currentQuestion].includes(index)) {
-        newSelectedAnswers[currentQuestion] = newSelectedAnswers[currentQuestion].filter((i) => i !== index);
+        newSelectedAnswers[currentQuestion] = newSelectedAnswers[
+          currentQuestion
+        ].filter((i) => i !== index);
       } else {
         newSelectedAnswers[currentQuestion].push(index);
       }
     } else {
-      // Para preguntas con una sola respuesta, reemplazamos la selección
       newSelectedAnswers[currentQuestion] = [index];
     }
 
@@ -50,9 +51,9 @@ const Quiz: React.FC = () => {
       const userAnswers = selectedAnswers[index] || [];
       const correctAnswers = question.respuesta;
 
-      // Verificamos si todas las respuestas correctas fueron seleccionadas
-      const isCorrect = correctAnswers.every((answer) => userAnswers.includes(answer)) &&
-                        userAnswers.length === correctAnswers.length;
+      const isCorrect =
+        correctAnswers.every((answer) => userAnswers.includes(answer)) &&
+        userAnswers.length === correctAnswers.length;
 
       if (isCorrect) {
         score += 1;
@@ -63,45 +64,36 @@ const Quiz: React.FC = () => {
 
   if (showResults) {
     return (
-      <div className="quiz-results">
-        <h2>Resultados</h2>
-        <p>Tu puntuación es: {calculateScore()} de {questions.length}</p>
-      </div>
+      <Results score={calculateScore()} totalQuestions={questions.length} />
     );
   }
 
-  const currentQ = questions[currentQuestion];
-  const isMultipleAnswer = currentQ.respuesta.length > 1;
-
   return (
-    <div className="quiz-container">
-      <h2>Pregunta {currentQuestion + 1} de {questions.length}</h2>
-      <p>{currentQ.pregunta}</p>
-      <ul>
-        {currentQ.opciones.map((opcion, index) => (
-          <li key={index}>
-            <label>
-              <input
-                type={isMultipleAnswer ? "checkbox" : "radio"}
-                name={`question-${currentQuestion}`}
-                checked={selectedAnswers[currentQuestion]?.includes(index) || false}
-                onChange={() => handleAnswerSelect(index)}
-              />
-              {opcion}
-            </label>
-          </li>
-        ))}
-      </ul>
-      <div className="quiz-navigation">
-        <button onClick={handlePreviousQuestion} disabled={currentQuestion === 0}>
+    <div className="quiz-container max-w-2xl mx-auto p-4 bg-white shadow-md rounded-lg min-h-[400px] max-h-[600px] flex flex-col min-w-[1000px]">
+      <div className="flex-grow">
+        <Question
+          question={questions[currentQuestion]}
+          totalQuestions={questions.length}
+          currentQuestion={currentQuestion}
+          selectedAnswers={selectedAnswers[currentQuestion] || []}
+          handleAnswerSelect={handleAnswerSelect}
+        />
+      </div>
+      <div className="quiz-navigation flex justify-between mt-4">
+        <button
+          onClick={handlePreviousQuestion}
+          disabled={currentQuestion === 0}
+          className="bg-gray-300 text-gray-700 px-4 py-2 rounded disabled:opacity-50"
+        >
           Anterior
         </button>
-        <button onClick={handleNextQuestion}>
+        <button
+          onClick={handleNextQuestion}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
           {currentQuestion === questions.length - 1 ? "Finalizar" : "Siguiente"}
         </button>
       </div>
     </div>
   );
 };
-
-export default Quiz;
